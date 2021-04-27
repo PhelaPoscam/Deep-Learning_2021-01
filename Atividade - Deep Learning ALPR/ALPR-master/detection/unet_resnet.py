@@ -149,3 +149,34 @@ class DecoderCenter(nn.Module):
 
     def forward(self, x):
         return self.block(x)
+
+def normalize_dataset(dataset):
+	min_arr = np.amin(dataset, axis=0)
+	return (dataset - min_arr) / (np.amax(dataset, axis=0) - min_arr)
+
+
+def fuzzy(variavel_1, variavel_2, variavel_3, variavel_4, data, target):
+
+	universe = np.linspace(0, 1, 100)
+
+	x = []
+	for variavel in [variavel_1, variavel_2, variavel_3, variavel_4]:
+		x.append({'pequeno': fuzz.trimf(universe, [0.0, 0.0, variavel]),
+		          'medio': fuzz.trimf(universe, [0.0, variavel, 1.0]),
+			        'grande': fuzz.trimf(universe, [variavel, 1.0, 1.0])})
+funcaoPertinencia(variavel)
+
+  #cria e visita todas as varíavels 
+	x_memb = []
+	for i in range(4):
+		x_memb.append({})
+		for t in ['pequeno', 'medio', 'grande']:
+			x_memb[i][t] = fuzz.interp_membership(universe, x[i][t], data[:, i])
+
+	is_setosa = np.fmin(np.fmax(x_memb[2]['pequeno'], x_memb[2]['medio']), x_memb[3]['pequeno'])
+	is_versicolor = np.fmax(np.fmin(np.fmin(np.fmin(np.fmax(x_memb[0]['pequeno'], x_memb[0]['grande']), np.fmax(x_memb[1]['medio'], x_memb[1]['grande'])), np.fmax(x_memb[2]['medio'], x_memb[2]['grande'])),x_memb[3]['medio']), np.fmin(x_memb[0]['medio'], np.fmin(np.fmin(np.fmax(x_memb[1]['pequeno'], x_memb[1]['medio']),x_memb[2]['pequeno']), x_memb[3]['grande'])))
+	is_virginica = np.fmin(np.fmin(np.fmax(x_memb[1]['pequeno'], x_memb[1]['medio']), x_memb[2]['grande']), x_memb[3]['grande'])
+   
+	result = np.argmax([is_setosa, is_versicolor, is_virginica], axis=0)
+
+	return (result == target).mean()
